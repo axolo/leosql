@@ -93,7 +93,7 @@ leosql.qs2sql(qs, [ type = 'sql', [beauty = false] ])
 #### 示例
 
 ```js
-const leosql = require('../src')
+const leosql = require('@axolo/leosql')
 const sql = leosql.qs2sql({
   "_fields": "id,name,mail",      // 字段（逗号分隔）
   "_sets": "accounts",             // 表（逗号分隔）
