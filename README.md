@@ -36,12 +36,16 @@ npm install @axolo/leosql
 ### 1. 转换为MySQL
 
 ```js
-leosql.qs2sql(qs, [ type = 'sql', [beauty = false] ])
+leosql.qs2sql({
+  query: object,
+  method: string,
+  beauty: boolean
+})
 ```
 
 ### 参数
 
-#### qs
+#### query
 
 查询参数
 
@@ -71,20 +75,21 @@ leosql.qs2sql(qs, [ type = 'sql', [beauty = false] ])
 > `_q` 全文检索功能尚未实现。
 
 
-#### type
+#### method
 
-输出类型
+输出类型，可选，默认`select`
 
-|    值     |   类型   |             说明              |
-| --------- | -------- | ----------------------------- |
-| `sql`     | `string` | 默认，返回`MySQL`语句         |
-| `count`   | `string` | 合计，返回`MySQL` `COUNT`语句 |
-| `columns` | `array`  | 字段，返回查询和条件字段数组  |
+|    值     |   类型   |              说明              |
+| --------- | -------- | ------------------------------ |
+| `select`  | `string` | 默认，返回`MySQL` `SELECT`语句 |
+| `update`  | `string` | 更新，返回`MySQL` `UPDATE`语句 |
+| `count`   | `string` | 合计，返回`MySQL` `COUNT`语句  |
+| `columns` | `array`  | 字段，返回查询和条件字段数组   |
 
 
 #### beauty
 
-是否美化`SQL`语句
+是否美化`SQL`语句，可选，默认`false`
 
 |   值    |   类型    |      说明      |
 | ------- | --------- | -------------- |
