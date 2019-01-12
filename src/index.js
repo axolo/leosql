@@ -1,22 +1,26 @@
 module.exports = {
-  qs2sql: (query, type = 'sql', beauty = false) => {
+  qs2sql: (params) => {
     const _ = require('lodash')
     const SqlString = require('sqlstring')
     const sqlFormatter =  require('sql-formatter')
+    const query = params.query
+    const method = params.method ? params.method.toLowerCase() : 'select'
+    const beauty = Boolean(params.beauty)
     const fields = []
+    const values = []
     let sql = []
-    let select = []
-    let from = []
+    let columns = []
+    let tables = []
     let where = []
-    let order = []
+    let orders = []
     let limit = ''
+    let page = 0
+    let rows = 0
     let operator = ''
     let expression = ''
     let index = -1
     let column = ''
     let logic = []
-    let page = 1
-    let rows = 10    // 默认行数
     // 解析 ---------------------------------------------------------------------
     _.forIn(query, (value, key) => {
       index = key.lastIndexOf('_')
@@ -28,20 +32,28 @@ module.exports = {
         default: {
           break
         }
+        // UPDATE
+        case '_values': {
+          const _values = Array.isArray(query._values) ? query._values : [query._values]
+          _.each(_values, item => {
+            values.push(SqlString.escape(item))
+          })
+          break
+        }
         // SELECT
         case '_fields': {
-          _.each(query._fields.split(','), item => {
+          const _fields = Array.isArray(query._fields) ? query._fields : [query._fields]
+          _.each(_fields, item => {
             fields.push(item)
-            select.push(item = SqlString.escapeId(item))
+            columns.push(SqlString.escapeId(item))
           })
           break
         }
         // DISTINCT <select_list>
         // FROM <left_table>
         case '_sets': {
-          _.each(query._sets.split(','), item => {
-            from.push(item = SqlString.escapeId(item))
-          })
+          const _sets = Array.isArray(query._sets) ? query._sets : [query._sets]
+          _.each(_sets, item => { tables.push(SqlString.escapeId(item)) })
           break
         }
         // <join_type> JOIN <right_table>
@@ -49,13 +61,17 @@ module.exports = {
         // WHERE <where_condition>
         case '_eq': {
           const eq = []
-          _.each(value.split(','), item => { eq.push(SqlString.escape(item)) })
-          expression = [column, 'IN(', eq.join(','), ')'].join(' ')
+          const _value = Array.isArray(value) ? value : [value]
+          _.each(_value, item => { eq.push(SqlString.escape(item)) })
+          expression = [column, 'IN (', eq.join(','), ')'].join(' ')
           where.push(expression)
           break
         }
         case '_ne': {
-          expression = [column, '<>', SqlString.escape(value)].join(' ')
+          const ne = []
+          const _value = Array.isArray(value) ? value : [value]
+          _.each(_value, item => { ne.push(SqlString.escape(item)) })
+          expression = [column, 'NOT IN (', ne.join(','), ')'].join(' ')
           where.push(expression)
           break
         }
@@ -98,13 +114,13 @@ module.exports = {
         // HAVING <having_condition>
         // ORDER BY <order_by_condition>
         case '_asc': {
-          const asc = value.split(',')
-          _.each(asc, item => { order.push(item = SqlString.escapeId(item) + ' ASC') })
+          const _asc = Array.isArray(query._asc) ? query._asc : [query._asc]
+          _.each(_asc, item => { orders.push(SqlString.escapeId(item) + ' ASC') })
           break
         }
         case '_desc': {
-          const desc = value.split(',')
-          _.each(desc, item => { order.push(item = SqlString.escapeId(item) + ' DESC') })
+          const _desc = Array.isArray(query._desc) ? query._desc : [query._desc]
+          _.each(_desc, item => { orders.push(SqlString.escapeId(item) + ' DESC') })
           break
         }
         // LIMIT <limit_number>
@@ -117,29 +133,47 @@ module.exports = {
           break
         }
         case '_logic': {
-          logic = query._logic.toUpperCase().split(',')
+          logic = Array.isArray(query._logic) ? query._logic : [query._logic]
           break
         }
       }
     })
     // 拼接 ---------------------------------------------------------------------
-    from = from.length ? ['FROM', from.join(',')].join(' ') : ''
     where.forEach((item, index) => {
-      index && (where[index] = [['AND', 'OR'].indexOf(logic[index - 1]) === -1 ? 'AND' : logic[index - 1], item].join(' '))
+      if(index) {
+        let _logic = logic[index - 1]
+        _logic = _logic ? _logic.toUpperCase() : 'AND'
+        _logic = ['AND', 'OR'].indexOf(_logic) === -1 ? 'AND' : _logic
+        where[index] = [_logic, item].join(' ')
+      }
     })
     where = where.length ? ['WHERE', where.join(' ')].join(' ') : ''
-    type = type && type.toLowerCase()
-    switch(type) {
-      default: {
-        select = select.length ? ['SELECT', select.join(', ')].join(' ') : ''
-        order = order.length ? ['ORDER BY', order.join(',')].join(' ') : ''
-        const offset = (page - 1) * rows
-        limit = limit || `LIMIT ${offset}, ${rows}`
+    switch(method) {
+      default:
+      case 'select': {
+        const select = columns.length ? ['SELECT', columns.join(', ')].join(' ') : ''
+        from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
+        const order = orders.length ? ['ORDER BY', orders.join(',')].join(' ') : ''
+        if(rows) {
+          page = page ? page : 1
+          const offset = (page - 1) * rows
+          limit = limit || [`LIMIT`, [offset, rows].join(', ')].join(' ')
+        }
         sql.push(select, from, where, order, limit)
         break
       }
       case 'count': {
-        sql.push('SELECT COUNT(*) ' + SqlString.escapeId(type), from, where)
+        from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
+        sql.push('SELECT COUNT(*) `count`', from, where)
+        break
+      }
+      case 'update': {
+        const update = []
+        _.each(columns, (column, index) => {
+          update.push([column, '=', values[index]].join(' '))
+        })
+        const table = tables.length ? tables.join(',') : ''
+        sql.push('UPDATE', table, 'SET', update.join(', '), where)
         break
       }
       case 'columns': {
