@@ -1,6 +1,6 @@
 {
   "name": "@axolo/leosql",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Generate MySQL from qs.parse(Querystring).",
   "main": "./src/index.js",
   "repository": "https://github.com/axolo/leosql",

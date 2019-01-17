@@ -7,7 +7,8 @@ module.exports = {
     const query = params.query
     const method = params.method ? params.method.toLowerCase() : 'select'
     const beauty = Boolean(params.beauty)
-    const fields = []
+    const fieldsRequest = []
+    const fieldsWhere = []
     const values = []
     let sql = []
     let columns = []
@@ -27,7 +28,7 @@ module.exports = {
       index = key.lastIndexOf('_')
       operator = key.substring(index)
       column = key.substring(0, index)
-      operators.indexOf(operator) !== -1 && fields.push(column)
+      operators.indexOf(operator) !== -1 && fieldsWhere.push(column)
       column && (column = SqlString.escapeId(column))
       switch(operator) {
         default: {
@@ -45,7 +46,7 @@ module.exports = {
         case '_fields': {
           const _fields = Array.isArray(query._fields) ? query._fields : [query._fields]
           _.each(_fields, item => {
-            fields.push(item)
+            fieldsRequest.push(item)
             columns.push(SqlString.escapeId(item))
           })
           break
@@ -189,7 +190,11 @@ module.exports = {
         break
       }
       case 'columns': {
-        return _.uniq(fields)
+        return {
+          request: _.uniq(fieldsRequest),
+          where: _.uniq(fieldsWhere),
+          all: _.uniq(_.concat(fieldsRequest, fieldsWhere))
+        }
       }
     }
     sql = sql.join(' ') + ';'
