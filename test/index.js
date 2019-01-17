@@ -1,5 +1,4 @@
-// const qs = require('qs')
-// const query = qs.parse(request.query)
+const qs = require('qs')
 const leosql = require('../src')
 const query = {
   "_sets": "accounts",                   // 表（字符串或数组）
@@ -19,14 +18,23 @@ const query = {
 
 const select = leosql.qs2sql({ query: query, method: 'select', beauty: true })
 const update = leosql.qs2sql({ query: query, method: 'update', beauty: true })
+const insert = leosql.qs2sql({ query: query, method: 'insert', beauty: true })
+const destory = leosql.qs2sql({ query: query, method: 'delete', beauty: true })
 const count = leosql.qs2sql({ query: query, method: 'count', beauty: true })
 const columns = leosql.qs2sql({ query: query, method: 'columns', beauty: true })
+const querystring = qs.stringify(query)
 
 
 console.log(select)
 console.log('----------------------------------------')
 console.log(update)
 console.log('----------------------------------------')
+console.log(insert)
+console.log('----------------------------------------')
+console.log(destory)
+console.log('----------------------------------------')
 console.log(count)
 console.log('----------------------------------------')
 console.log(columns)
+console.log('----------------------------------------')
+console.log(querystring)

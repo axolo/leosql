@@ -3,6 +3,7 @@ module.exports = {
     const _ = require('lodash')
     const SqlString = require('sqlstring')
     const sqlFormatter =  require('sql-formatter')
+    const operators = ['_eq', '_ne', '_gt', '_lt', '_gte', '_lte', '_have', '_has', '_start', '_end']
     const query = params.query
     const method = params.method ? params.method.toLowerCase() : 'select'
     const beauty = Boolean(params.beauty)
@@ -26,7 +27,7 @@ module.exports = {
       index = key.lastIndexOf('_')
       operator = key.substring(index)
       column = key.substring(0, index)
-      column && fields.push(column)
+      operators.indexOf(operator) !== -1 && fields.push(column)
       column && (column = SqlString.escapeId(column))
       switch(operator) {
         default: {
@@ -95,7 +96,8 @@ module.exports = {
           where.push(expression)
           break
         }
-        case '_have': {
+        case '_have':
+        case '_has': {
           expression = [column, 'like', SqlString.escape('%' + value + '%')].join(' ')
           where.push(expression)
           break
@@ -152,7 +154,7 @@ module.exports = {
       default:
       case 'select': {
         const select = columns.length ? ['SELECT', columns.join(', ')].join(' ') : ''
-        from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
+        const from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
         const order = orders.length ? ['ORDER BY', orders.join(',')].join(' ') : ''
         if(rows) {
           page = page ? page : 1
@@ -163,7 +165,7 @@ module.exports = {
         break
       }
       case 'count': {
-        from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
+        const from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
         sql.push('SELECT COUNT(*) `count`', from, where)
         break
       }
@@ -174,6 +176,16 @@ module.exports = {
         })
         const table = tables.length ? tables.join(',') : ''
         sql.push('UPDATE', table, 'SET', update.join(', '), where)
+        break
+      }
+      case 'insert': {
+        const table = tables.length ? tables.join(',') : ''
+        sql.push('INSERT INTO', table, '(', columns.join(', ') , ') VALUES (', values.join(', ') ,')')
+        break
+      }
+      case 'delete': {
+        const from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
+        sql.push('DELETE', from, where)
         break
       }
       case 'columns': {
