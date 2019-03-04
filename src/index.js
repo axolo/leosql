@@ -136,7 +136,7 @@ module.exports = {
           break
         }
         case '_logic': {
-          logic = Array.isArray(query._logic) ? query._logic : [query._logic]
+          logic = query._logic
           break
         }
       }
@@ -144,7 +144,7 @@ module.exports = {
     // 拼接 ---------------------------------------------------------------------
     where.forEach((item, index) => {
       if(index) {
-        let _logic = logic[index - 1]
+        let _logic = Array.isArray(logic) ? logic[index - 1] : logic
         _logic = _logic ? _logic.toUpperCase() : 'AND'
         _logic = ['AND', 'OR'].indexOf(_logic) === -1 ? 'AND' : _logic
         where[index] = [_logic, item].join(' ')
