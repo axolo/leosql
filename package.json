@@ -17,6 +17,7 @@
     "sqlstring": "^2.3.1"
   },
   "devDependencies": {
+    "eslint": "^5.15.0",
     "qs": "^6.6.0"
   }
 }
