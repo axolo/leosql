@@ -1,5 +1,5 @@
 module.exports = {
-  qs2sql: (params) => {
+  qs2sql: params => {
     const _ = require('lodash')
     const SqlString = require('sqlstring')
     const sqlFormatter =  require('sql-formatter')
@@ -10,13 +10,13 @@ module.exports = {
     const fieldsRequest = []
     const fieldsWhere = []
     const values = []
+    const columns = []
+    const tables = []
+    const orders = []
     let sql = []
-    let columns = []
-    let tables = []
     let where = []
-    let orders = []
-    let limit = ''
     let page = 0
+    let offset = 0
     let rows = 0
     let operator = ''
     let expression = ''
@@ -126,13 +126,15 @@ module.exports = {
           _.each(_desc, item => { orders.push(SqlString.escapeId(item) + ' DESC') })
           break
         }
+        case '_limit': {
+          rows = parseInt(query._limit)
+          break
+        }
         // LIMIT <limit_number>
         case '_page': {
           page = parseInt(query._page)
-          break
-        }
-        case '_limit': {
-          rows = parseInt(query._limit)
+          page = page ? page : 1
+          offset = (page - 1) * rows
           break
         }
         case '_logic': {
@@ -157,11 +159,7 @@ module.exports = {
         const select = columns.length ? ['SELECT', columns.join(', ')].join(' ') : ''
         const from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
         const order = orders.length ? ['ORDER BY', orders.join(',')].join(' ') : ''
-        if(rows) {
-          page = page ? page : 1
-          const offset = (page - 1) * rows
-          limit = limit || [`LIMIT`, [offset, rows].join(', ')].join(' ')
-        }
+        const limit = rows ? [`LIMIT`, [offset, rows].join(', ')].join(' ') : ''
         sql.push(select, from, where, order, limit)
         break
       }
@@ -195,6 +193,9 @@ module.exports = {
           where: _.uniq(fieldsWhere),
           all: _.uniq(_.concat(fieldsRequest, fieldsWhere))
         }
+      }
+      case 'limit': {
+        return { offset: offset, limit: rows }
       }
     }
     sql = sql.join(' ') + ';'

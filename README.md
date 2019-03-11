@@ -81,7 +81,7 @@ leosql.qs2sql({ query: object, method: string, beauty: boolean })
 
 输出类型，可选值，默认`select`。
 
-|    值     |   类型   |              说明              |
+|    值     | 输出格式 |              说明              |
 | --------- | -------- | ------------------------------ |
 | `select`  | `string` | 默认，返回`MySQL` `SELECT`语句 |
 | `update`  | `string` | 更新，返回`MySQL` `UPDATE`语句 |
@@ -89,12 +89,18 @@ leosql.qs2sql({ query: object, method: string, beauty: boolean })
 | `delete`  | `string` | 删除，返回`MySQL` `DELETE`语句 |
 | `count`   | `string` | 合计，返回`MySQL` `COUNT`语句  |
 | `columns` | `object` | 字段，返回查询、条件包含的字段 |
+| `limit`   | `boject` | 范围，返回起始位置和查询行数  |
 
 **当输出类型为`columns`时：**
 
 - `request`：被`SELECT`、`UPDATE`、`INSERT`、`DELETE`语句请求字段
 - `where`：`WHERE`条件包含的字段
 - `all`：以上两者皆是
+
+**当输出类型为`limit`时：**
+
+- `offset`：本次查询的起始位置
+- `limit`：本次查询约定的记录数
 
 #### beauty
 
@@ -156,6 +162,10 @@ yarn test
 ```
 
 ## 版本
+
+### 0.0.7
+
+- 实现`limit`
 
 ### 0.0.6
 

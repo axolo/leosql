@@ -1,6 +1,7 @@
-const qs = require('qs')
+//
 const leosql = require('../src')
 const querystring = `_sets=accounts&_fields[]=id&_fields[]=name&_fields[]=mail&_values[]=ID&_values[]=NAME&_values[]=MAIL&spawned_gte=20190101&spawned_lte=20190105&name_ne[]=admin&name_ne[]=root&destroied_eq[]=true&destroied_eq[]=false&mail_end=%40mail.com&_logic[]=and&_logic[]=and&_logic[]=or&_asc=mail&_desc[]=spawned&_desc[]=modified&_limit=20&_page=3`
+const qs = require('qs')
 const query = qs.parse(querystring)
 
 // const query = {
@@ -24,7 +25,8 @@ const update = leosql.qs2sql({ query: query, method: 'update', beauty: true })
 const insert = leosql.qs2sql({ query: query, method: 'insert', beauty: true })
 const destory = leosql.qs2sql({ query: query, method: 'delete', beauty: true })
 const count = leosql.qs2sql({ query: query, method: 'count', beauty: true })
-const columns = leosql.qs2sql({ query: query, method: 'columns', beauty: true })
+const columns = leosql.qs2sql({ query: query, method: 'columns' })
+const limit = leosql.qs2sql({ query: query, method: 'limit' })
 
 console.log('-- -------------------------------------')
 console.log('-- QueryString')
@@ -58,3 +60,7 @@ console.log('-- -------------------------------------')
 console.log('-- columns')
 console.log('-- -------------------------------------')
 console.log(columns)
+console.log('-- -------------------------------------')
+console.log('-- limit')
+console.log('-- -------------------------------------')
+console.log(limit)
