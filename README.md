@@ -163,34 +163,43 @@ yarn test
 
 ## 版本
 
+### TODO
+
+- [ ] 移除`switch...case...`，各个功能取值使用独立方法，提高效率。如仅需调用`limit()`方法即可获得分页信息。
+- [ ] 优化参数逻辑，判断必填参数，保证`SQL`语句完整。
+
+### 0.0.8
+
+修正分页取值错误。
+
 ### 0.0.7
 
-- 实现`limit`
+实现`limit`，返回当前分页信息。
 
 ### 0.0.6
 
-- `_logic`不为数组时，为所有条件插入相同的关系。如：`_logic=or`，所有条件之间的关系均为`OR`。
+`_logic`不为数组时，为所有条件插入相同的关系。如：`_logic=or`，所有条件之间的关系均为`OR`。
 
 ### 0.0.5
 
-- `columns`分类
+`columns`分类，返回请求字段、条件字段和两者的合集。
 
 ### 0.0.4
 
-- 实现`insert`和`delete`
+实现`insert`和`delete`，返回`INSERT`语句和`DELETE`语句。
 
 ### 0.0.3
 
-- 修正判断逻辑
+修正判断逻辑。
 
 ### 0.0.2
 
-- 遵循[qs](https://github.com/ljharb/qs)标准格式
-- 实现`update`
+此版本开始`QueryString`需遵循[qs](https://github.com/ljharb/qs)格式。
+实现了`update`，返回`UPDATE`语句。
 
 ### 0.0.1
 
-- 以逗号分隔多个值
-- 实现`select`、`count`和`columns`
+`QueryString`以逗号分隔多个值的。
+实现了`select`返回`SELECT`语句，`count`返回`COUNT(*)`语句，`columns`返回请求和条件字段数组。
 
 > 方跃明
