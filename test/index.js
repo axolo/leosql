@@ -1,6 +1,14 @@
-//
 const leosql = require('../src')
-const querystring = `_sets=accounts&_fields[]=id&_fields[]=name&_fields[]=mail&_values[]=ID&_values[]=NAME&_values[]=MAIL&spawned_gte=20190101&spawned_lte=20190105&name_ne[]=admin&name_ne[]=root&destroied_eq[]=true&destroied_eq[]=false&mail_end=%40mail.com&_logic[]=and&_logic[]=and&_logic[]=or&_asc=mail&_desc[]=spawned&_desc[]=modified&_limit=20&_page=3`
+const querystring = `_sets=accounts\
+&_fields[]=id&_fields[]=name&_fields[]=mail\
+&_values[]=ID&_values[]=NAME&_values[]=MAIL\
+&spawned_gte=20190101&spawned_lte=20190105\
+&name_ne[]=admin&name_ne[]=root\
+&destroied_eq[]=true&destroied_eq[]=false\
+&mail_end=%40mail.com\
+&_logic[]=and&_logic[]=and&_logic[]=or\
+&_asc=mail&_desc[]=spawned&_desc[]=modified\
+&_limit=20&_page=3`
 const qs = require('qs')
 const query = qs.parse(querystring)
 

@@ -127,13 +127,16 @@ module.exports = {
           break
         }
         case '_limit': {
-          rows = parseInt(query._limit) || 1
+          const _limit = parseInt(query._limit)
+          rows = _limit > 0 ? _limit : 0
           break
         }
         // LIMIT <limit_number>
         case '_page': {
-          page = parseInt(query._page) || 1
-          rows = parseInt(query._limit) || 1
+          const _page = parseInt(query._page)
+          const _limit = parseInt(query._limit)
+          page = _page > 0 ? _page : 1
+          rows = _limit > 0 ? _limit : 0
           offset = (page - 1) * rows
           break
         }
