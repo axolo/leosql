@@ -1,208 +1,170 @@
-module.exports = {
-  qs2sql: params => {
-    const _ = require('lodash')
-    const SqlString = require('sqlstring')
-    const sqlFormatter =  require('sql-formatter')
-    const operators = ['_eq', '_ne', '_gt', '_lt', '_gte', '_lte', '_have', '_has', '_start', '_end']
-    const query = params.query
-    const method = params.method ? params.method.toLowerCase() : 'select'
-    const beauty = Boolean(params.beauty)
-    const fieldsRequest = []
-    const fieldsWhere = []
-    const values = []
-    const columns = []
-    const tables = []
-    const orders = []
-    let sql = []
-    let where = []
-    let page = 0
-    let offset = 0
-    let rows = 0
-    let operator = ''
-    let expression = ''
-    let index = -1
-    let column = ''
-    let logic = []
-    // 解析 ---------------------------------------------------------------------
-    _.forIn(query, (value, key) => {
-      index = key.lastIndexOf('_')
-      operator = key.substring(index)
-      column = key.substring(0, index)
-      operators.indexOf(operator) !== -1 && fieldsWhere.push(column)
-      column && (column = SqlString.escapeId(column))
-      switch(operator) {
-        default: {
-          break
-        }
-        // UPDATE
-        case '_values': {
-          const _values = Array.isArray(query._values) ? query._values : [query._values]
-          _.each(_values, item => {
-            values.push(SqlString.escape(item))
-          })
-          break
-        }
-        // SELECT
-        case '_fields': {
-          const _fields = Array.isArray(query._fields) ? query._fields : [query._fields]
-          _.each(_fields, item => {
-            fieldsRequest.push(item)
-            columns.push(SqlString.escapeId(item))
-          })
-          break
-        }
-        // DISTINCT <select_list>
-        // FROM <left_table>
-        case '_sets': {
-          const _sets = Array.isArray(query._sets) ? query._sets : [query._sets]
-          _.each(_sets, item => { tables.push(SqlString.escapeId(item)) })
-          break
-        }
-        // <join_type> JOIN <right_table>
-        // ON <join_condition>
-        // WHERE <where_condition>
-        case '_eq': {
-          const eq = []
-          const _value = Array.isArray(value) ? value : [value]
-          _.each(_value, item => { eq.push(SqlString.escape(item)) })
-          expression = [column, 'IN (', eq.join(','), ')'].join(' ')
-          where.push(expression)
-          break
-        }
-        case '_ne': {
-          const ne = []
-          const _value = Array.isArray(value) ? value : [value]
-          _.each(_value, item => { ne.push(SqlString.escape(item)) })
-          expression = [column, 'NOT IN (', ne.join(','), ')'].join(' ')
-          where.push(expression)
-          break
-        }
-        case '_gt': {
-          expression = [column, '>', SqlString.escape(value)].join(' ')
-          where.push(expression)
-          break
-        }
-        case '_lt': {
-          expression = [column, '<', SqlString.escape(value)].join(' ')
-          where.push(expression)
-          break
-        }
-        case '_gte': {
-          expression = [column, '>=', SqlString.escape(value)].join(' ')
-          where.push(expression)
-          break
-        }
-        case '_lte': {
-          expression = [column, '<=', SqlString.escape(value)].join(' ')
-          where.push(expression)
-          break
-        }
-        case '_have':
-        case '_has': {
-          expression = [column, 'like', SqlString.escape('%' + value + '%')].join(' ')
-          where.push(expression)
-          break
-        }
-        case '_start': {
-          expression = [column, 'like', SqlString.escape(value + '%')].join(' ')
-          where.push(expression)
-          break
-        }
-        case '_end': {
-          expression = [column, 'like', SqlString.escape('%' + value)].join(' ')
-          where.push(expression)
-          break
-        }
-        // GROUP BY <group_by_list>
-        // HAVING <having_condition>
-        // ORDER BY <order_by_condition>
-        case '_asc': {
-          const _asc = Array.isArray(query._asc) ? query._asc : [query._asc]
-          _.each(_asc, item => { orders.push(SqlString.escapeId(item) + ' ASC') })
-          break
-        }
-        case '_desc': {
-          const _desc = Array.isArray(query._desc) ? query._desc : [query._desc]
-          _.each(_desc, item => { orders.push(SqlString.escapeId(item) + ' DESC') })
-          break
-        }
-        case '_limit': {
-          const _limit = parseInt(query._limit)
-          rows = _limit > 0 ? _limit : 0
-          break
-        }
-        // LIMIT <limit_number>
-        case '_page': {
-          const _page = parseInt(query._page)
-          const _limit = parseInt(query._limit)
-          page = _page > 0 ? _page : 1
-          rows = _limit > 0 ? _limit : 0
-          offset = (page - 1) * rows
-          break
-        }
-        case '_logic': {
-          logic = query._logic
-          break
-        }
-      }
-    })
-    // 拼接 ---------------------------------------------------------------------
-    where.forEach((item, index) => {
-      if(index) {
-        let _logic = Array.isArray(logic) ? logic[index - 1] : logic
-        _logic = _logic ? _logic.toUpperCase() : 'AND'
-        _logic = ['AND', 'OR'].indexOf(_logic) === -1 ? 'AND' : _logic
-        where[index] = [_logic, item].join(' ')
-      }
-    })
-    where = where.length ? ['WHERE', where.join(' ')].join(' ') : ''
-    switch(method) {
-      default:
-      case 'select': {
-        const select = columns.length ? ['SELECT', columns.join(', ')].join(' ') : ''
-        const from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
-        const order = orders.length ? ['ORDER BY', orders.join(',')].join(' ') : ''
-        const limit = rows ? [`LIMIT`, [offset, rows].join(', ')].join(' ') : ''
-        sql.push(select, from, where, order, limit)
-        break
-      }
-      case 'count': {
-        const from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
-        sql.push('SELECT COUNT(*) `count`', from, where)
-        break
-      }
-      case 'update': {
-        const update = []
-        _.each(columns, (column, index) => {
-          update.push([column, '=', values[index]].join(' '))
-        })
-        const table = tables.length ? tables.join(',') : ''
-        sql.push('UPDATE', table, 'SET', update.join(', '), where)
-        break
-      }
-      case 'insert': {
-        const table = tables.length ? tables.join(',') : ''
-        sql.push('INSERT INTO', table, '(', columns.join(', ') , ') VALUES (', values.join(', ') ,')')
-        break
-      }
-      case 'delete': {
-        const from = tables.length ? ['FROM', tables.join(',')].join(' ') : ''
-        sql.push('DELETE', from, where)
-        break
-      }
-      case 'columns': {
-        return {
-          request: _.uniq(fieldsRequest),
-          where: _.uniq(fieldsWhere),
-          all: _.uniq(_.concat(fieldsRequest, fieldsWhere))
-        }
-      }
-      case 'limit': {
-        return { offset: offset, limit: rows }
-      }
-    }
-    sql = sql.join(' ') + ';'
-    sql = beauty ? sqlFormatter.format(sql) : sql
-    return sql
+const _  = require('lodash')
+const SqlString = require('sqlstring')
+const sqlFormatter = require('sql-formatter')
+
+/**
+ * **LeoSQL**
+ *
+ * Generate MySQL from qs.parse(Querystring).
+ *
+ * @class LeoSQL
+ */
+class LeoSQL {
+
+  constructor(request) {
+    this.request = request
+    this.beauty = true
   }
+
+  /**
+   * **传统QueryString转LeoSQL格式**
+   *
+   * 非强制使用LeoSQL生成SQL，用于RBA要判断授权情况
+   *
+   * @param {array} includes 被包含的属性必须转为LeoSQL格式，避免漏判
+   * @param {array} excludes 被排除的属性不转换为LeoSQL格式，避免误判
+   * @memberof LeoSQL
+   */
+  toLeosql(includes, excludes) {
+    return { includes: includes, excludes: excludes }
+  }
+
+  fromLeosql() {
+
+  }
+
+  getTables() {
+    return this.request._tables
+  }
+
+  getFields() {
+    return this.request._fields
+  }
+
+  getValues() {
+    return this.request._values
+  }
+
+  getWhere() {
+    const operators = [
+      '_eq',
+      '_ne',
+      '_gt',
+      '_lt',
+      '_gte',
+      '_lte',
+      '_have',
+      '_has',
+      '_start',
+      '_end'
+    ]
+    const where = { fields: [], sqls: [] }
+    _.forIn(this.request, (value, key) => {
+      const index = key.lastIndexOf('_')
+      const operator = key.substring(index)
+      if(operators.indexOf(operator) !== -1) {
+        const field = key.substring(0, index)
+        where.fields.push(field)
+        switch(operator) {
+          case '_eq': {
+            where.sqls.push([SqlString.escapeId(field), 'IN (', SqlString.escape(value), ')'].join(' '))
+            break
+          }
+          case '_ne': {
+            where.sqls.push([SqlString.escapeId(field), 'NOT IN (', SqlString.escape(value), ')'].join(' '))
+            break
+          }
+          case '_gt': {
+            where.sqls.push([SqlString.escapeId(field), '>', SqlString.escape(value)].join(' '))
+            break
+          }
+          case '_lt': {
+            where.sqls.push([SqlString.escapeId(field), '<', SqlString.escape(value)].join(' '))
+            break
+          }
+          case '_gte': {
+            where.sqls.push([SqlString.escapeId(field), '>=', SqlString.escape(value)].join(' '))
+            break
+          }
+          case '_lte': {
+            where.sqls.push([SqlString.escapeId(field), '<=', SqlString.escape(value)].join(' '))
+            break
+          }
+          case '_have':
+          case '_has': {
+            where.sqls.push([SqlString.escapeId(field), 'like', SqlString.escape('%' + value + '%')].join(' '))
+            break
+          }
+          case '_start': {
+            where.sqls.push([SqlString.escapeId(field), 'like', SqlString.escape(value + '%')].join(' '))
+            break
+          }
+          case '_end': {
+            where.sqls.push([SqlString.escapeId(field), 'like', SqlString.escape('%' + value)].join(' '))
+            break
+          }
+        }
+      }
+    })
+    where.fields = _.uniq(where.fields)
+    return where
+  }
+
+  getLogic() {
+    const logic = this.request._logic
+    return logic
+  }
+
+  getLimit() {
+    const _limit = parseInt(this.request._limit)
+    const limit = _limit > 0 ? _limit : 0
+    return limit
+  }
+
+  getOffset() {
+    const _page = parseInt(this.request._page)
+    const page = _page > 0 ? _page : 1
+    const limit = this.getLimit()
+    const offset = (page - 1) * limit
+    return offset
+  }
+
+  getOrder() {
+    // FIXME: ASC、DESC先后顺序
+    const orders = []
+    const asc = Array.isArray(this.request._asc) ? this.request._asc : [this.request._asc]
+    asc && _.each(asc, item => orders.push([SqlString.escapeId(item), 'ASC'].join(' ')))
+    const desc = Array.isArray(this.request._desc) ? this.request._desc : [this.request._desc]
+    desc && _.each(desc, item => orders.push([SqlString.escapeId(item), 'DESC'].join(' ')))
+    return orders
+  }
+
+  sqlInsert() {
+
+  }
+
+  sqlSelect() {
+    const sql = [
+      'SELECT',
+      SqlString.escapeId(this.getFields()),
+      'FROM',
+      SqlString.escapeId(this.getTables())
+    ].join(' ')
+    return this.beauty ? sqlFormatter.format(sql) : sql
+  }
+
+  sqlUpdate() {
+
+  }
+
+  sqlDelete() {
+
+  }
+
+  sqlCount() {
+
+  }
+
 }
+
+module.exports = LeoSQL
