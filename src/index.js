@@ -185,6 +185,17 @@ class LeoSQL {
   }
 
   /**
+   * **获取 `LIMIT` SQL语句**
+   *
+   * @return {String} LIMIT SQL字符串
+   * @memberof LeoSQL
+   */
+  limit() {
+    const limit = this.getLimit() ? 'LIMIT ' + [this.getOffset(), this.getLimit()].join() : ''
+    return limit
+  }
+
+  /**
    * **获取 `ORDER BY` SQL语句**
    *
    * @return {String} 排序SQL字符串
@@ -232,7 +243,7 @@ class LeoSQL {
     const from = this.getTable() ? ('FROM ' + SqlString.escapeId(this.getTable())) : ''
     const where = this.where()
     const order = this.order()
-    const limit = 'LIMIT ' + [this.getOffset(), this.getLimit()].join()
+    const limit = this.limit()
     const sql = [select, from, where, order, limit].join(' ')
     if(this.beauty) return sqlFormatter.format(sql)
     return sql
