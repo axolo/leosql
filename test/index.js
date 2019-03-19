@@ -1,4 +1,4 @@
-const querystring = `_table=accounts&_table=user\
+const querystring = `_table=user\
 &_column=id&_column=name&_column=mail\
 &_value=ID&_value=NAME&_value=MAIL\
 &spawned_gte=20190101&spawned_lte=20190105\
@@ -6,13 +6,13 @@ const querystring = `_table=accounts&_table=user\
 &destroied_eq=true&destroied_eq=false\
 &mail_end=%40mail.com\
 &_logic=and&_logic=and&_logic=or\
-&_asc=mail&_desc=spawned&_desc=modified\
+&_desc=spawned&_desc=modified&_asc=mail\
 &_limit=20&_page=3`
 
 const qs = require('qs')
 const query = qs.parse(querystring)
 const LeoSQL = require('../src')
-const leosql = new LeoSQL(query)
+const leosql = new LeoSQL(query, true)
 
 /**
 query = {
@@ -32,12 +32,18 @@ query = {
 }
 */
 
-console.log(leosql.getTable())
-console.log(leosql.getColumn())
-console.log(leosql.getValue())
-console.log(leosql.getWhere())
-console.log(leosql.getLogic())
-console.log(leosql.getLimit())
-console.log(leosql.getOffset())
-console.log(leosql.getOrder())
-console.log(leosql.sqlSelect())
+// console.log(leosql.getTable())
+// console.log(leosql.getColumn())
+// console.log(leosql.getValue())
+// console.log(leosql.getWhere())
+// console.log(leosql.order())
+console.log('-- INSERT -------------------')
+console.log(leosql.insert())
+console.log('-- SELECT -------------------')
+console.log(leosql.select())
+console.log('-- UPDATE -------------------')
+console.log(leosql.update())
+console.log('-- DELETE -------------------')
+console.log(leosql.delete())
+console.log('-- COUNT -------------------')
+console.log(leosql.count())

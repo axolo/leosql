@@ -28,7 +28,7 @@
     
     <input type="text" id="nav-search" placeholder="Search" />
     
-    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/axolo/leosql" target="_blank" class="menu-item" id="website_link" >GitHub</a></h2><h3>Classes</h3><ul><li><a href="LeoSQL.html">LeoSQL</a><ul class='methods'><li data-type='method' style='display: none;'><a href="LeoSQL.html#getColumn">getColumn</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getLimit">getLimit</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getOffset">getOffset</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getOrder">getOrder</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getTable">getTable</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getValue">getValue</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getWhere">getWhere</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#sqlCount">sqlCount</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#sqlDelete">sqlDelete</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#sqlInsert">sqlInsert</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#sqlSelect">sqlSelect</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#sqlUpdate">sqlUpdate</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/axolo/leosql" target="_blank" class="menu-item" id="website_link" >GitHub</a></h2><h3>Classes</h3><ul><li><a href="LeoSQL.html">LeoSQL</a><ul class='methods'><li data-type='method' style='display: none;'><a href="LeoSQL.html#count">count</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#delete">delete</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getColumn">getColumn</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getLimit">getLimit</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getOffset">getOffset</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getTable">getTable</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getValue">getValue</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getWhere">getWhere</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#getWhereColumn">getWhereColumn</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#insert">insert</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#order">order</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#select">select</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#update">update</a></li><li data-type='method' style='display: none;'><a href="LeoSQL.html#where">where</a></li></ul></li></ul>
 </nav>
 
 <div id="main">
@@ -58,7 +58,7 @@
 
 
     <section class="readme">
-        <article><h1>LeoSQL</h1><p>将<code>HTTP</code>的<code>querystring</code>或<code>body</code>转换为存储引擎（比如<a href="https://github.com/mysqljs/mysql"><code>MySQL</code></a>）能够理解和执行的格式，
+        <article><h1>LeoSQL</h1><p>将<code>HTTP</code>的<code>querystring</code>或<code>body</code>转换为存储引擎（比如<a href="https://github.com/mysqljs/mysql">MySQL</a>）能够理解和执行的格式，
 同时确保存储安全，不被恶意注入攻击，是一项不小的挑战。常规的检索数据方法有：</p>
 <ul>
 <li>条件（<code>WHERE</code>）<ul>
@@ -93,31 +93,29 @@
 </ul>
 </li>
 </ul>
-<h2>安装</h2><pre class="prettyprint source lang-bash"><code>npm install @axolo/leosql</code></pre><h2>方法</h2><h3>qs2sql</h3><p>将<code>QueryString</code>对象转换为<code>MySQL</code>语句或相关内容</p>
-<pre class="prettyprint source lang-js"><code>leosql.qs2sql({ query: object, method: string, beauty: boolean })</code></pre><h4>query</h4><p>查询参数，由一组约定了格式的对象组成，用于被解析为<code>SQL</code>语句。</p>
 <table>
 <thead>
 <tr>
-<th>键</th>
+<th>请求</th>
 <th>类型</th>
 <th>值</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>_sets</code></td>
+<td><code>_table</code></td>
 <td>字符串或数组</td>
 <td>表，<strong>尽量由程序生成</strong></td>
 </tr>
 <tr>
-<td><code>_fields</code></td>
+<td><code>_column</code></td>
 <td>字符串或数组</td>
 <td>字段，<strong>尽量由程序生成</strong></td>
 </tr>
 <tr>
-<td><code>_values</code></td>
+<td><code>_value</code></td>
 <td>字符串或数组</td>
-<td>值，用于匹配<code>INSERT</code>和<code>UPDATE</code>时的<code>_fields</code></td>
+<td>值，用于匹配<code>INSERT</code>和<code>UPDATE</code>时的<code>_column</code></td>
 </tr>
 <tr>
 <td><code>*_eq</code></td>
@@ -206,138 +204,46 @@
 数组长度不足时，后续未匹配到的条件关系均默认为<code>AND</code>。</p>
 </li>
 </ul>
-<h4>method</h4><p>输出类型，可选值，默认<code>select</code>。</p>
-<table>
-<thead>
-<tr>
-<th>值</th>
-<th>输出格式</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>select</code></td>
-<td><code>string</code></td>
-<td>默认，返回<code>MySQL</code> <code>SELECT</code>语句</td>
-</tr>
-<tr>
-<td><code>update</code></td>
-<td><code>string</code></td>
-<td>更新，返回<code>MySQL</code> <code>UPDATE</code>语句</td>
-</tr>
-<tr>
-<td><code>insert</code></td>
-<td><code>string</code></td>
-<td>插入，返回<code>MySQL</code> <code>INSERT</code>语句</td>
-</tr>
-<tr>
-<td><code>delete</code></td>
-<td><code>string</code></td>
-<td>删除，返回<code>MySQL</code> <code>DELETE</code>语句</td>
-</tr>
-<tr>
-<td><code>count</code></td>
-<td><code>string</code></td>
-<td>合计，返回<code>MySQL</code> <code>COUNT</code>语句</td>
-</tr>
-<tr>
-<td><code>columns</code></td>
-<td><code>object</code></td>
-<td>字段，返回查询、条件包含的字段</td>
-</tr>
-<tr>
-<td><code>limit</code></td>
-<td><code>boject</code></td>
-<td>范围，返回起始位置和查询行数</td>
-</tr>
-</tbody>
-</table>
-<p><strong>当输出类型为<code>columns</code>时：</strong></p>
-<ul>
-<li><code>request</code>：被<code>SELECT</code>、<code>UPDATE</code>、<code>INSERT</code>、<code>DELETE</code>语句请求字段</li>
-<li><code>where</code>：<code>WHERE</code>条件包含的字段</li>
-<li><code>all</code>：以上两者皆是</li>
-</ul>
-<p><strong>当输出类型为<code>limit</code>时：</strong></p>
-<ul>
-<li><code>offset</code>：本次查询的起始位置</li>
-<li><code>limit</code>：本次查询约定的记录数</li>
-</ul>
-<h4>beauty</h4><p>当输出为<code>SQL</code>语句时，是否美化<code>SQL</code>语句，可选值，默认<code>false</code>。</p>
-<table>
-<thead>
-<tr>
-<th>值</th>
-<th>类型</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>false</code></td>
-<td><code>boolean</code></td>
-<td>不美化（默认）</td>
-</tr>
-<tr>
-<td><code>true</code></td>
-<td><code>boolean</code></td>
-<td>美化</td>
-</tr>
-</tbody>
-</table>
-<h4>示例</h4><pre class="prettyprint source lang-js"><code>const leosql = require('@axolo/leosql')
-const query = {
-  &quot;_sets&quot;: &quot;accounts&quot;,                   // 表（字符串或数组）
-  &quot;_fields&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;mail&quot;],     // 字段（字符串或数组）
-  &quot;spawned_gte&quot;: &quot;20190101&quot;,             // 大于等于（字符串）
-  &quot;spawned_lte&quot;: &quot;20190105&quot;,             // 小于等于（字符串）
-  &quot;name_ne&quot;: [&quot;admin&quot;, &quot;root&quot;],          // 不等于（字符串或数组）
-  &quot;destroied_eq&quot;: [true, false],         // 等于（字符串或数组）
-  &quot;mail_end&quot;: &quot;@mail.com&quot;,               // 包含（字符串）
-  &quot;_logic&quot;: [&quot;and&quot;, &quot;and&quot;, &quot;or&quot;],        // 逻辑关系（字符串或数组）
-  &quot;_asc&quot;: &quot;mail&quot;,                        // 顺序（字符串或数组）
-  &quot;_desc&quot;: [&quot;spawned&quot;, &quot;modified&quot;],      // 逆序（字符串）
-  &quot;_limit&quot;: 20,                          // 容量（数字或字符串）
-  &quot;_page&quot;: 3,                            // 页码（数字或字符串）
-}
-const sql = leosql.qs2sql({ query: query, method: 'select', beauty: true })
-console.log(sql)</code></pre><pre class="prettyprint source lang-sql"><code>-- 相当于生成如下 MySQL 语句
+<h2>安装</h2><pre class="prettyprint source lang-bash"><code>npm install @axolo/leosql</code></pre><h2>方法</h2><p>参见<a href="https://axolo.github.io/leosql">LeoSQL文档</a></p>
+<h2>示例</h2><pre class="prettyprint source lang-js"><code>const qs = require('qs')
+const LeoSQL = require('@axolo/leosql')
+
+const query = qs.parse(`_table=user\
+&_column=id&_column=name&_column=mail\
+&_value=ID&_value=NAME&_value=MAIL\
+&spawned_gte=20190101&spawned_lte=20190105\
+&name_ne=admin&name_ne=root\
+&destroied_eq=true&destroied_eq=false\
+&mail_end=%40mail.com\
+&_logic=and&_logic=and&_logic=or\
+&_desc=spawned&_desc=modified&_asc=mail\
+&_limit=20&_page=3`)
+
+const leosql = new LeoSQL(query, true)
+console.log(leosql.select())</code></pre><pre class="prettyprint source lang-sql"><code>-- 相当于生成如下 MySQL 语句
 SELECT
   `id`,
   `name`,
   `mail`
 FROM
-  `accounts`
+  `user`
 WHERE
-  `spawned` >= '20190101'
+  (`spawned` >= '20190101'
   AND `spawned` &lt;= '20190105'
   AND `name` NOT IN ('admin', 'root')
-  OR `destroied` IN (true, false)
-  AND `mail` like '%@mail.com'
+  OR `destroied` IN ('true', 'false')
+  AND `mail` like '%@mail.com')
 ORDER BY
   `mail` ASC,
   `spawned` DESC,
   `modified` DESC
 LIMIT
-  40, 20;</code></pre><h2>测试</h2><pre class="prettyprint source lang-bash"><code>yarn test</code></pre><h2>版本</h2><h3>TODO</h3><ul>
-<li>[ ] 移除<code>switch...case...</code>，各个功能取值使用独立方法，提高效率。如仅需调用<code>limit()</code>方法即可获得分页信息。</li>
-<li>[ ] 优化参数逻辑，判断必填参数，保证<code>SQL</code>语句完整。</li>
+  40, 20</code></pre><h2>测试</h2><pre class="prettyprint source lang-bash"><code>yarn test</code></pre><h2>版本</h2><h3>TODO</h3><ul>
+<li>条件分组，考虑以括号分组条件，更加贴近SQL，避免产生错误。</li>
+<li>排序先后顺序，考虑排序的先后顺序。</li>
 </ul>
-<h3>0.0.9</h3><p>修正分页取值逻辑。分页默认为<code>1</code>，数据记录默认为<code>0</code>行。</p>
-<h3>0.0.8</h3><p>修正分页取值错误。</p>
-<h3>0.0.7</h3><p>实现<code>limit</code>，返回当前分页信息。</p>
-<h3>0.0.6</h3><p><code>_logic</code>不为数组时，为所有条件插入相同的关系。如：<code>_logic=or</code>，所有条件之间的关系均为<code>OR</code>。</p>
-<h3>0.0.5</h3><p><code>columns</code>分类，返回请求字段、条件字段和两者的合集。</p>
-<h3>0.0.4</h3><p>实现<code>insert</code>和<code>delete</code>，返回<code>INSERT</code>语句和<code>DELETE</code>语句。</p>
-<h3>0.0.3</h3><p>修正判断逻辑。</p>
-<h3>0.0.2</h3><p>此版本开始<code>QueryString</code>需遵循<a href="https://github.com/ljharb/qs">qs</a>格式。
-实现了<code>update</code>，返回<code>UPDATE</code>语句。</p>
-<h3>0.0.1</h3><p><code>QueryString</code>以逗号分隔多个值的。
-实现了<code>select</code>返回<code>SELECT</code>语句，<code>count</code>返回<code>COUNT(*)</code>语句，<code>columns</code>返回请求和条件字段数组。</p>
-<blockquote>
-<p>方跃明</p>
-</blockquote></article>
+<h3>0.1.0</h3><p>重构，且不兼容<code>0.0.x</code>。</p>
+<h3>0.0.x</h3><p>历史版本，不再维护。</p></article>
     </section>
 
 
@@ -352,7 +258,7 @@ LIMIT
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Mar 17 2019 16:08:39 GMT+0800 (GMT+08:00) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Mar 19 2019 15:30:59 GMT+0800 (GMT+08:00) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
