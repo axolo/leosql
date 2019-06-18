@@ -303,4 +303,4 @@ class LeoSQL {
 
 }
 
-module.exports = LeoSQL
+module.exports = (request, beauty) => new LeoSQL(request, beauty)

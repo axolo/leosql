@@ -1,6 +1,6 @@
 {
   "name": "@axolo/leosql",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Generate MySQL from qs.parse(Querystring).",
   "keywords": ["SQL Generator", "MySQL", "SQL parser", "Querystring to SQL", "Querystring"],
   "main": "./src/index.js",
@@ -10,18 +10,18 @@
   "private": false,
   "scripts": {
     "build": "webpack --progress --hide-modules",
-    "test": "node ./test",
+    "test": "node ./test/index.js",
     "jsdoc": "jsdoc . -c jsdoc.json --readme README.md"
   },
   "dependencies": {
     "lodash": "^4.17.11",
-    "sql-formatter": "^2.3.2",
+    "sql-formatter": "^2.3.3",
     "sqlstring": "^2.3.1"
   },
   "devDependencies": {
-    "docdash": "^1.0.3",
-    "eslint": "^5.15.0",
-    "jsdoc": "^3.5.5",
-    "qs": "^6.6.0"
+    "docdash": "^1.1.1",
+    "eslint": "^5.16.0",
+    "jsdoc": "^3.6.2",
+    "qs": "^6.7.0"
   }
 }

@@ -1,4 +1,7 @@
-const querystring = `_table=user\
+const qs = require('qs')
+const leosql = require('../src')
+
+const query = `_table=user\
 &_column=id&_column=name&_column=mail\
 &_value=ID&_value=NAME&_value=MAIL\
 &spawned_gte=20190101&spawned_lte=20190105\
@@ -9,10 +12,7 @@ const querystring = `_table=user\
 &_desc=spawned&_desc=modified&_asc=mail\
 &_limit=20&_page=3`
 
-const qs = require('qs')
-const query = qs.parse(querystring)
-const LeoSQL = require('../src')
-const leosql = new LeoSQL(query, true)
+const sql = leosql(qs.parse(query), true)
 
 /**
 query = {
@@ -32,18 +32,19 @@ query = {
 }
 */
 
-// console.log(leosql.getTable())
-// console.log(leosql.getColumn())
-// console.log(leosql.getValue())
-// console.log(leosql.getWhere())
-// console.log(leosql.order())
 console.log('-- INSERT -------------------')
-console.log(leosql.insert())
+console.log(sql.insert())
 console.log('-- SELECT -------------------')
-console.log(leosql.select())
+console.log(sql.select())
 console.log('-- UPDATE -------------------')
-console.log(leosql.update())
+console.log(sql.update())
 console.log('-- DELETE -------------------')
-console.log(leosql.delete())
+console.log(sql.delete())
 console.log('-- COUNT -------------------')
-console.log(leosql.count())
+console.log(sql.count())
+
+// console.log(sql.getTable())
+// console.log(sql.getColumn())
+// console.log(sql.getValue())
+// console.log(sql.getWhere())
+// console.log(sql.order())
