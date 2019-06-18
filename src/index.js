@@ -40,7 +40,6 @@ class LeoSQL {
       }
     })
     where.column = _.uniq(where.column)
-    this.whereColumn = where.column
     // 组装条件逻辑
     const logic = this.request._logic
     where.items.forEach((item, index) => {
@@ -52,7 +51,7 @@ class LeoSQL {
       }
     })
     const sql = _.isEmpty(where.items) ? '' : ('WHERE (' + where.items.join(' ') + ')')
-    this.whereSql = sql
+    this.where = { column: where.column, sql: sql }
   }
 
 
@@ -103,7 +102,7 @@ class LeoSQL {
    * @memberof LeoSQL
    */
   get whereColumn() {
-    return this.whereColumn
+    return this.where.column
   }
 
   /**
@@ -139,7 +138,7 @@ class LeoSQL {
    * @memberof LeoSQL
    */
   get whereSql() {
-    return this.whereSql
+    return this.where.sql
   }
 
   /**
