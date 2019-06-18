@@ -17,9 +17,19 @@ class LeoSQL {
   }
 
   /**
-   * **获取表列表**
+   * **获取方法**
    *
-   * @return {String|Array} 表列表
+   * @return {String} 方法
+   * @memberof LeoSQL
+   */
+  getMethod() {
+    return this.request._method || 'SELECT'
+  }
+
+  /**
+   * **获取表**
+   *
+   * @return {String|Array} 表
    * @memberof LeoSQL
    */
   getTable() {
@@ -56,7 +66,7 @@ class LeoSQL {
    */
   getWhere() {
     const operators = ['_eq', '_ne', '_gt', '_lt', '_gte', '_lte', '_have', '_has', '_start', '_end']
-    const ignore = ['_q', '_table', '_column', '_value', '_logic', '_desc', '_asc', '_limit', '_page']
+    const ignore = ['_q', '_method', '_table', '_column', '_value', '_logic', '_desc', '_asc', '_limit', '_page']
     const where = { column: [], items: [] }
     _.forIn(this.request, (value, key) => {
       if(ignore.indexOf(key) === -1) {
