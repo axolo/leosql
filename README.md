@@ -27,8 +27,9 @@
 
 |   请求    |     类型     |                         值                         |
 | --------- | ------------ | -------------------------------------------------- |
+| `_method` | 字符串或数组 | 方法，**尽量由程序生成**                           |
 | `_table`  | 字符串或数组 | 表，**尽量由程序生成**                             |
-| `_column` | 字符串或数组 | 字段，**尽量由程序生成**                           |
+| `_column` | 字符串或数组 | 列，**尽量由程序生成**                             |
 | `_value`  | 字符串或数组 | 值，用于匹配`INSERT`和`UPDATE`时的`_column`        |
 | `*_eq`    | 字符串或数组 | 等于，* 表示字段名                                 |
 | `*_ne`    | 字符串或数组 | 不等于，* 表示字段名                               |
@@ -71,7 +72,9 @@ npm install @axolo/leosql
 
 ```js
 const qs = require('qs')
+const sqlFormatter = require('sql-formatter')
 const leosql = require('../src')
+
 const query = `_table=user\
 &_column=id&_column=name&_column=mail\
 &_value=ID&_value=NAME&_value=MAIL\
@@ -82,13 +85,15 @@ const query = `_table=user\
 &_logic=and&_logic=and&_logic=or\
 &_desc=spawned&_desc=modified&_asc=mail\
 &_limit=20&_page=3`
-const leo = leosql(qs.parse(query), true)
 
-console.log(leo.select())
+const leo = leosql(qs.parse(query))
+
+console.log(sqlFormatter.format(leo.select))
 ```
 
+> 相当于生成如下 MySQL 语句
+
 ```sql
--- 相当于生成如下 MySQL 语句
 SELECT
   `id`,
   `name`,
@@ -122,6 +127,10 @@ yarn test
 
 - 条件分组，考虑以括号分组条件，更加贴近SQL，避免产生错误。
 - 排序先后顺序，考虑排序的先后顺序。
+
+### 0.2.0
+
+方法改为属性。
 
 ### 0.1.3
 

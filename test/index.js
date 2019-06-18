@@ -1,4 +1,5 @@
 const qs = require('qs')
+const sqlFormatter = require('sql-formatter')
 const leosql = require('../src')
 
 const query = `_table=user\
@@ -12,7 +13,7 @@ const query = `_table=user\
 &_desc=spawned&_desc=modified&_asc=mail\
 &_limit=20&_page=3`
 
-const leo = leosql(qs.parse(query), true)
+const leo = leosql(qs.parse(query))
 
 /**
 query = {
@@ -33,14 +34,18 @@ query = {
 }
 */
 
-console.log('\nINSERT:', leo.insert())
-console.log('\nSELECT:', leo.select())
-console.log('\nUPDATE:', leo.update())
-console.log('\nDELETE:', leo.delete())
-console.log('\nCOUNT:', leo.count())
-console.log('\nMETHOD:', leo.getMethod())
-console.log('\nTABLE:', leo.getTable())
-console.log('\nCOLUMN:',leo.getColumn())
-console.log('\nVALUE:', leo.getValue())
-console.log('\nWHERE:', leo.getWhere())
-console.log('\nORDER:', leo.order())
+
+console.log(sqlFormatter.format(leo.select), '\n')
+console.log(sqlFormatter.format(leo.insert), '\n')
+console.log(sqlFormatter.format(leo.update), '\n')
+console.log(sqlFormatter.format(leo.delete), '\n')
+console.log(sqlFormatter.format(leo.count), '\n')
+
+console.log('\nMETHOD:', leo.method)
+console.log('\nTABLE:', leo.table)
+console.log('\nCOLUMN:',leo.column)
+console.log('\nVALUE:', leo.value)
+console.log('\nWHERE:', leo.whereSql)
+console.log('\nORDER:', leo.orderSql)
+
+console.log(leo)

@@ -1,70 +1,16 @@
 const _  = require('lodash')
 const SqlString = require('sqlstring')
-const sqlFormatter = require('sql-formatter')
 
 class LeoSQL {
 
   /**
-   * **从QueryString对象生成SQL语句**
+   * **处理请求**
    *
    * @constructor
    * @param {Object} request  请求对象，一般为`qs.parse(QueryString)`
-   * @param {Boolean} [beauty=false]  格式化SQL，美化SQL代码
    */
-  constructor(request, beauty = false) {
+  constructor(request) {
     this.request = request
-    this.beauty = beauty
-  }
-
-  /**
-   * **获取方法**
-   *
-   * @return {String} 方法
-   * @memberof LeoSQL
-   */
-  getMethod() {
-    return this.request._method || 'SELECT'
-  }
-
-  /**
-   * **获取表**
-   *
-   * @return {String|Array} 表
-   * @memberof LeoSQL
-   */
-  getTable() {
-    return this.request._table
-  }
-
-  /**
-   * **获字段列表**
-   *
-   * @return {String|Array} 字段列表
-   * @memberof LeoSQL
-   */
-  getColumn() {
-    return this.request._column
-  }
-
-  /**
-   * **获取值列表**
-   *
-   * @return {String|Array} 值列表
-   * @memberof LeoSQL
-   */
-  getValue() {
-    return this.request._value
-  }
-
-  /**
-   * **获取条件列表和SQL语句**
-   *
-   * 组装了逻辑关系的 WHERE (SQL字符串)
-   *
-   * @return {Object} 条件列表，`{column: 条件字段数组, sql: 条件 SQL语句字符串}`
-   * @memberof LeoSQL
-   */
-  getWhere() {
     const operators = ['_eq', '_ne', '_gt', '_lt', '_gte', '_lte', '_have', '_has', '_start', '_end']
     const ignore = ['_q', '_method', '_table', '_column', '_value', '_logic', '_desc', '_asc', '_limit', '_page']
     const where = { column: [], items: [] }
@@ -94,6 +40,7 @@ class LeoSQL {
       }
     })
     where.column = _.uniq(where.column)
+    this.whereColumn = where.column
     // 组装条件逻辑
     const logic = this.request._logic
     where.items.forEach((item, index) => {
@@ -105,82 +52,115 @@ class LeoSQL {
       }
     })
     const sql = _.isEmpty(where.items) ? '' : ('WHERE (' + where.items.join(' ') + ')')
-    return { column: where.column, sql: sql }
+    this.whereSql = sql
+  }
+
+
+  /**
+   * SQL操作方法，默认`SELECT`
+   *
+   * @prop {String}
+   * @memberof LeoSQL
+   */
+  get method() {
+    return this.request._method || 'SELECT'
   }
 
   /**
-   * **获取条件字段列表**
+   * 表，数据表名称
    *
-   * 相当于`getWhere().column`
-   *
-   * @return {Array} 条件字段列表
+   * @prop {String|Array}
    * @memberof LeoSQL
    */
-  getWhereColumn() {
-    return this.getWhere().column
+  get table() {
+    return this.request._table
   }
 
   /**
-   * **获取 `WHERE` SQL语句**
+   * 被写入的列的列表，用于`UPDATE`和`INSERT`方法
    *
-   * 相当于`getWhere().sql`
-   *
-   * @return {String} 条件SQL语句
+   * @prop {String|Array}
    * @memberof LeoSQL
    */
-  where() {
-    return this.getWhere().sql
+  get column() {
+    return this.request._column
   }
 
   /**
-   * **获取偏移量**
+   * 被写入的值的列表，用于`UPDATE`和`INSERT`方法
    *
-   * 相当于 `LIMIT m, n` 的 `n`
-   *
-   * @return {Number} 偏移量
+   * @prop {String|Array}
    * @memberof LeoSQL
    */
-  getLimit() {
+  get value() {
+    return this.request._value
+  }
+
+  /**
+   * 条件包含的列名称列表
+   *
+   * @prop {String|Array}
+   * @memberof LeoSQL
+   */
+  get whereColumn() {
+    return this.whereColumn
+  }
+
+  /**
+   * 请求的偏移量，相当于 `LIMIT m, n` 的 `n`
+   *
+   * @return {Number}
+   * @memberof LeoSQL
+   */
+  get limit() {
     const _limit = parseInt(this.request._limit)
     const limit = _limit > 0 ? _limit : 0
     return limit
   }
 
   /**
-   * **获取偏移位置**
+   * 请求的起始位置，相当于 `LIMIT m, n` 的 `m`
    *
-   * 相当于 `LIMIT m, n` 的 `m`
-   *
-   * @return {Number} 偏移位置
+   * @return {Number}
    * @memberof LeoSQL
    */
-  getOffset() {
+  get offset() {
     const _page = parseInt(this.request._page)
     const page = _page > 0 ? _page : 1
-    const limit = this.getLimit()
+    const limit = this.limit
     const offset = (page - 1) * limit
     return offset
   }
 
   /**
-   * **获取 `LIMIT` SQL语句**
+   * `WHERE`的`SQL`语句片段
    *
-   * @return {String} LIMIT SQL字符串
+   * @return {String}
    * @memberof LeoSQL
    */
-  limit() {
-    const limit = this.getLimit() ? 'LIMIT ' + [this.getOffset(), this.getLimit()].join() : ''
+  get whereSql() {
+    return this.whereSql
+  }
+
+  /**
+   * `LIMIT`的`SQL`语句片段
+   *
+   * @return {String}
+   * @memberof LeoSQL
+   */
+  get limitSql() {
+    const limit = this.limit ? 'LIMIT ' + [this.offset, this.limit].join() : ''
     return limit
   }
 
   /**
-   * **获取 `ORDER BY` SQL语句**
+   * `ORDER BY`的`SQL`语句片段
    *
-   * @return {String} 排序SQL字符串
+   * @todo 区分先后顺序
+   * @return {String}
    * @memberof LeoSQL
    */
-  order() {
-    // FIXME: ASC、DESC先后顺序
+  get orderSql() {
     const orders = []
     if(!_.isEmpty(this.request._asc)) {
       const asc = Array.isArray(this.request._asc) ? this.request._asc : [this.request._asc]
@@ -195,90 +175,86 @@ class LeoSQL {
   }
 
   /**
-   * **获取 `INSERT` SQL语句**
-   * @return {String} `INSERT` SQL语句
+   * `INSERT`的`SQL`语句
+   *
+   * @return {String}
    * @memberof LeoSQL
    */
-  insert() {
-    if(_.isEmpty(this.getColumn())) return ''
+  get insert() {
+    if(_.isEmpty(this.column)) return ''
     const sql = [
       'INSERT INTO ',
-      SqlString.escapeId(this.getTable()),
-      '(', SqlString.escapeId(this.getColumn()), ') VALUES (',
-      SqlString.escape(this.getValue()), ')'].join(' ')
-      if(this.beauty) return sqlFormatter.format(sql)
+      SqlString.escapeId(this.table),
+      '(', SqlString.escapeId(this.column), ') VALUES (',
+      SqlString.escape(this.value), ')'].join(' ')
       return sql
   }
 
   /**
-   * **获取 `SELECT` SQL语句**
+   * `SELECT`的`SQL`语句
    *
-   * @return {String} `SELECT` SQL语句
+   * @return {String}
    * @memberof LeoSQL
    */
-  select() {
-    const select = this.getColumn() ? ('SELECT ' + SqlString.escapeId(this.getColumn())) : ''
-    const from = this.getTable() ? ('FROM ' + SqlString.escapeId(this.getTable())) : ''
-    const where = this.where()
-    const order = this.order()
-    const limit = this.limit()
+  get select() {
+    const select = this.column ? ('SELECT ' + SqlString.escapeId(this.column)) : ''
+    const from = this.table ? ('FROM ' + SqlString.escapeId(this.table)) : ''
+    const where = this.whereSql
+    const order = this.orderSql
+    const limit = this.limitSql
     const sql = [select, from, where, order, limit].join(' ')
-    if(this.beauty) return sqlFormatter.format(sql)
     return sql
   }
 
   /**
-   * **获取 `UPDATE` SQL语句**
+   * `UPDATE`的`SQL`语句
    *
-   * @return {String} `UPDATE` SQL语句
+   * @return {String}
    * @memberof LeoSQL
    */
-  update() {
-    const columns = this.getColumn()
+  get update() {
+    const columns = this.column
     if(_.isEmpty(columns)) return ''
-    const values = this.getValue()
+    const values = this.value
     const sets = []
     columns.forEach((column, index) => {
       sets.push([SqlString.escapeId(column), '=', SqlString.escape(values[index])].join(' '))
     })
     const sql = [
-      'UPDATE', SqlString.escapeId(this.getTable()),
+      'UPDATE', SqlString.escapeId(this.table),
       'SET', sets.join(','),
-      this.where()
+      this.whereSql
     ].join(' ')
-    if(this.beauty) return sqlFormatter.format(sql)
     return sql
   }
 
   /**
-   * **获取 `DELETE` SQL语句**
+   * `DELETE`的`SQL`语句
    *
-   * @return {String} `DELETE` SQL语句
+   * @return {String}
    * @memberof LeoSQL
    */
-  delete() {
-    const from = this.getTable() ? ('FROM ' + SqlString.escapeId(this.getTable())) : ''
-    const where = this.where()
+  get delete() {
+    const from = this.table ? ('FROM ' + SqlString.escapeId(this.table)) : ''
+    const where = this.whereSql
     const sql = ['DELETE', from, where].join(' ')
-    if(this.beauty) return sqlFormatter.format(sql)
     return sql
   }
 
   /**
-   * **获取 `COUNT` SQL语句**
+   * `COUNT`的`SQL`语句
    *
-   * @return {String} `COUNT` SQL语句
+   * @return {String}
    * @memberof LeoSQL
    */
-  count() {
+  get count() {
     const select = 'SELECT COUNT(*) count'
-    const from = this.getTable() ? ('FROM ' + SqlString.escapeId(this.getTable())) : ''
-    const where = this.where()
+    const from = this.table ? ('FROM ' + SqlString.escapeId(this.table)) : ''
+    const where = this.whereSql
     const sql = [select, from, where].join(' ')
-    if(this.beauty) return sqlFormatter.format(sql)
     return sql
   }
 
 }
 
-module.exports = (request, beauty) => new LeoSQL(request, beauty)
+module.exports = (request) => new LeoSQL(request)
