@@ -55,63 +55,31 @@ class LeoSQL {
    * @memberof LeoSQL
    */
   getWhere() {
-    const operators = [
-      '_eq',
-      '_ne',
-      '_gt',
-      '_lt',
-      '_gte',
-      '_lte',
-      '_have',
-      '_has',
-      '_start',
-      '_end'
-    ]
+    const operators = ['_eq', '_ne', '_gt', '_lt', '_gte', '_lte', '_have', '_has', '_start', '_end']
+    const ignore = ['_q', '_table', '_column', '_value', '_logic', '_desc', '_asc', '_limit', '_page']
     const where = { column: [], items: [] }
     _.forIn(this.request, (value, key) => {
-      const index = key.lastIndexOf('_')
-      const operator = key.substring(index)
-      if(operators.indexOf(operator) !== -1) {
-        const column = key.substring(0, index)
-        where.column.push(column)
-        switch(operator) {
-          case '_eq': {
-            where.items.push([SqlString.escapeId(column), 'IN (', SqlString.escape(value), ')'].join(' '))
-            break
+      if(ignore.indexOf(key) === -1) {
+        const index = key.lastIndexOf('_')
+        const operator = key.substring(index)
+        if(operators.indexOf(operator) > -1) {
+          const column = key.substring(0, index)
+          where.column.push(column)
+          switch(operator) {
+            case '_eq': { where.items.push([SqlString.escapeId(column), 'IN (', SqlString.escape(value), ')'].join(' ')); break }
+            case '_ne': { where.items.push([SqlString.escapeId(column), 'NOT IN (', SqlString.escape(value), ')'].join(' ')); break }
+            case '_gt': { where.items.push([SqlString.escapeId(column), '>', SqlString.escape(value)].join(' ')); break }
+            case '_lt': { where.items.push([SqlString.escapeId(column), '<', SqlString.escape(value)].join(' ')); break }
+            case '_gte': { where.items.push([SqlString.escapeId(column), '>=', SqlString.escape(value)].join(' ')); break }
+            case '_lte': { where.items.push([SqlString.escapeId(column), '<=', SqlString.escape(value)].join(' ')); break }
+            case '_have': { where.items.push([SqlString.escapeId(column), 'like', SqlString.escape('%' + value + '%')].join(' ')); break }
+            case '_has': { where.items.push([SqlString.escapeId(column), 'like', SqlString.escape('%' + value + '%')].join(' ')); break }
+            case '_start': { where.items.push([SqlString.escapeId(column), 'like', SqlString.escape(value + '%')].join(' ')); break }
+            case '_end': { where.items.push([SqlString.escapeId(column), 'like', SqlString.escape('%' + value)].join(' ')); break }
           }
-          case '_ne': {
-            where.items.push([SqlString.escapeId(column), 'NOT IN (', SqlString.escape(value), ')'].join(' '))
-            break
-          }
-          case '_gt': {
-            where.items.push([SqlString.escapeId(column), '>', SqlString.escape(value)].join(' '))
-            break
-          }
-          case '_lt': {
-            where.items.push([SqlString.escapeId(column), '<', SqlString.escape(value)].join(' '))
-            break
-          }
-          case '_gte': {
-            where.items.push([SqlString.escapeId(column), '>=', SqlString.escape(value)].join(' '))
-            break
-          }
-          case '_lte': {
-            where.items.push([SqlString.escapeId(column), '<=', SqlString.escape(value)].join(' '))
-            break
-          }
-          case '_have':
-          case '_has': {
-            where.items.push([SqlString.escapeId(column), 'like', SqlString.escape('%' + value + '%')].join(' '))
-            break
-          }
-          case '_start': {
-            where.items.push([SqlString.escapeId(column), 'like', SqlString.escape(value + '%')].join(' '))
-            break
-          }
-          case '_end': {
-            where.items.push([SqlString.escapeId(column), 'like', SqlString.escape('%' + value)].join(' '))
-            break
-          }
+        } else {
+          where.column.push(key)
+          where.items.push([SqlString.escapeId(key), 'IN (', SqlString.escape(value), ')'].join(' '))
         }
       }
     })

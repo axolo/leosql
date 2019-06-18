@@ -71,19 +71,20 @@ npm install @axolo/leosql
 
 ```js
 const qs = require('qs')
-const leosql = require('@axolo/leosql')
+const leosql = require('../src')
 const query = `_table=user\
 &_column=id&_column=name&_column=mail\
 &_value=ID&_value=NAME&_value=MAIL\
 &spawned_gte=20190101&spawned_lte=20190105\
-&name_ne=admin&name_ne=root\
+&name=guest&name_ne=admin&name_ne=root\
 &destroied_eq=true&destroied_eq=false\
 &mail_end=%40mail.com\
 &_logic=and&_logic=and&_logic=or\
 &_desc=spawned&_desc=modified&_asc=mail\
 &_limit=20&_page=3`
-const sql = leosql(qs.parse(query), true)
-console.log(sql.select())
+const leo = leosql(qs.parse(query), true)
+
+console.log(leo.select())
 ```
 
 ```sql
@@ -97,6 +98,7 @@ FROM
 WHERE
   (`spawned` >= '20190101'
   AND `spawned` <= '20190105'
+  AND `name` IN ('guest')
   AND `name` NOT IN ('admin', 'root')
   OR `destroied` IN ('true', 'false')
   AND `mail` like '%@mail.com')
@@ -120,6 +122,10 @@ yarn test
 
 - 条件分组，考虑以括号分组条件，更加贴近SQL，避免产生错误。
 - 排序先后顺序，考虑排序的先后顺序。
+
+### 0.1.3
+
+接受无需转义的请求。
 
 ### 0.1.2
 
