@@ -8,8 +8,8 @@ const query = `_table=user\
 &spawned_gte=20190101&spawned_lte=20190105\
 &name=guest&name_ne=admin&name_ne=root\
 &destroied_eq=true&destroied_eq=false\
-&mail_end=%40mail.com\
-&_logic=and&_logic=and&_logic=or\
+&mail_end=@mail.com\
+&_logic=and&_logic=or&_logic=or\
 &_desc=spawned&_desc=modified&_asc=mail\
 &_limit=20&_page=3`
 
@@ -33,7 +33,6 @@ query = {
   "_page": 3,                            // 页码（数字或字符串）
 }
 */
-
 
 console.log(sqlFormatter.format(leo.select), '\n')
 console.log(sqlFormatter.format(leo.insert), '\n')

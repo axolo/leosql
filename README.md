@@ -101,18 +101,21 @@ SELECT
 FROM
   `user`
 WHERE
-  (`spawned` >= '20190101'
+  (
+    `name` IN ('guest')
+    OR `name` NOT IN ('admin', 'root')
+  )
+  AND `spawned` >= '20190101'
   AND `spawned` <= '20190105'
-  AND `name` IN ('guest')
-  AND `name` NOT IN ('admin', 'root')
-  OR `destroied` IN ('true', 'false')
-  AND `mail` like '%@mail.com')
+  AND `destroied` IN ('true', 'false')
+  AND `mail` like '%@mail.com'
 ORDER BY
   `mail` ASC,
   `spawned` DESC,
   `modified` DESC
 LIMIT
   40, 20
+
 ```
 
 ## 测试
@@ -127,6 +130,14 @@ yarn test
 
 - 条件分组，考虑以括号分组条件，更加贴近SQL，避免产生错误。
 - 排序先后顺序，考虑排序的先后顺序。
+
+### 0.2.2
+
+组合处理逻辑关系OR。
+
+### 0.2.1
+
+调整版本号。
 
 ### 0.2.0
 

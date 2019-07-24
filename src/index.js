@@ -42,15 +42,24 @@ class LeoSQL {
     where.column = _.uniq(where.column)
     // 组装条件逻辑
     const logic = this.request._logic
+    const logicOr = []
+    const logicAnd = []
     where.items.forEach((item, index) => {
-      if(index) {
+      // if(index) {
         let _logic = Array.isArray(logic) ? logic[index - 1] : logic
         _logic = _logic ? _logic.toUpperCase() : 'AND'
         _logic = ['AND', 'OR'].indexOf(_logic) === -1 ? 'AND' : _logic
-        where.items[index] = [_logic, item].join(' ')
-      }
+        if(_logic === 'OR') {
+          logicOr.push(item)
+        } else {
+          logicAnd.push(item)
+        }
+      // }
     })
-    const sql = _.isEmpty(where.items) ? '' : ('WHERE (' + where.items.join(' ') + ')')
+    const whereAll = []
+    !_.isEmpty(logicOr) && whereAll.push('(' + logicOr.join(' OR ') + ')')
+    !_.isEmpty(logicAnd) && whereAll.push(logicAnd.join(' AND '))
+    const sql = _.isEmpty(whereAll) ? '' : 'WHERE ' + whereAll.join(' AND ')
     this.where = { column: where.column, sql: sql }
   }
 
