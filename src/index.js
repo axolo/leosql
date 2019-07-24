@@ -46,7 +46,7 @@ class LeoSQL {
     const logicAnd = []
     where.items.forEach((item, index) => {
       // if(index) {
-        let _logic = Array.isArray(logic) ? logic[index - 1] : logic
+        let _logic = Array.isArray(logic) ? logic[index] : logic
         _logic = _logic ? _logic.toUpperCase() : 'AND'
         _logic = ['AND', 'OR'].indexOf(_logic) === -1 ? 'AND' : _logic
         if(_logic === 'OR') {

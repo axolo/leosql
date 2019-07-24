@@ -9,7 +9,7 @@ const query = `_table=user\
 &name=guest&name_ne=admin&name_ne=root\
 &destroied_eq=true&destroied_eq=false\
 &mail_end=@mail.com\
-&_logic=and&_logic=or&_logic=or\
+&_logic=or&_logic=and&_logic=or\
 &_desc=spawned&_desc=modified&_asc=mail\
 &_limit=20&_page=3`
 
